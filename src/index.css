@@ -1,0 +1,197 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* class 기반 dark mode — html.dark 일 때 dark: prefix 활성화 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-accent-50:  #effefa;
+  --color-accent-100: #ccfbf1;
+  --color-accent-200: #99f6e4;
+  --color-accent-300: #5eead4;
+  --color-accent-400: #2dd4bf;
+  --color-accent-500: #14b8a6;
+  --color-accent-600: #0d9488;
+  --color-accent-700: #0f766e;
+  --color-accent-800: #115e59;
+  --color-accent-900: #134e4a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: #fcfcfc;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+::selection {
+  background: rgba(45, 212, 191, 0.22);
+}
+
+.article-prose {
+  color: #374151;
+  font-size: 1.0625rem;
+  line-height: 1.9;
+}
+
+.article-prose :where(h2) {
+  color: #1f2937;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  letter-spacing: 0;
+  line-height: 1.18;
+  margin-top: 3.5rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 7rem;
+}
+
+.article-prose :where(h3) {
+  color: #1f2937;
+  font-size: 1.375rem;
+  letter-spacing: 0;
+  line-height: 1.35;
+  margin-top: 2.5rem;
+  scroll-margin-top: 7rem;
+}
+
+.article-prose :where(p, ul, ol) {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.article-prose :where(strong) {
+  color: #1f2937;
+  font-weight: 650;
+}
+
+.article-prose :where(blockquote) {
+  border-left: 3px solid #2dd4bf;
+  background: #f7f8fa;
+  border-radius: 0 12px 12px 0;
+  color: #374151;
+  font-style: normal;
+  margin: 2rem 0;
+  padding: 1rem 1.25rem;
+}
+
+.article-prose :where(hr) {
+  border-color: #e5e7eb;
+  margin: 3rem 0;
+}
+
+.article-prose :where(img) {
+  margin: 2.5rem 0;
+}
+
+.article-prose :where(.callout) {
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin: 2rem 0;
+  padding: 1rem 1.25rem;
+}
+
+.dark .article-prose {
+  color: #d1d5db;
+}
+
+.dark .article-prose :where(h2, h3, strong) {
+  color: #f9fafb;
+}
+
+.dark .article-prose :where(blockquote, .callout) {
+  background: rgba(17, 24, 39, 0.72);
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark .article-prose :where(hr) {
+  border-color: #1f2937;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #9ca3af;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name {
+  color: #5eead4;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute {
+  color: #fcd34d;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable {
+  color: #93c5fd;
+}
+
+/* Konami 벚꽃 낙하 */
+@keyframes petalFall {
+  0% {
+    transform: translateY(-60px) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) translateX(var(--sway, 0px)) rotate(var(--rot, 180deg));
+    opacity: 0;
+  }
+}
+
+/* 토스트 진입 */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* 타이핑 커서 깜빡임 */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* 이모지 버스트 */
+@keyframes emojiBurst {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) rotate(var(--rot, 0deg)) scale(0.2);
+    opacity: 0;
+  }
+}
