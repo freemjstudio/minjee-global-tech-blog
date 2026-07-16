@@ -43,9 +43,11 @@ export function useTypewriter({
 
     if (phase === 'deleting') {
       if (displayed === '') {
-        setTextIndex((i) => (i + 1) % texts.length)
-        setPhase('typing')
-        return
+        const t = setTimeout(() => {
+          setTextIndex((i) => (i + 1) % texts.length)
+          setPhase('typing')
+        }, 0)
+        return () => clearTimeout(t)
       }
       const t = setTimeout(
         () => setDisplayed((d) => d.slice(0, -1)),

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { useKonamiCode } from '@/shared/hooks/useKonamiCode'
 
 const PETALS = ['🌸', '🌺', '✨', '🌷', '💮', '🪷']
@@ -30,16 +30,7 @@ function makePetals(): Petal[] {
 
 export function KonamiEasterEgg() {
   const activated = useKonamiCode()
-  const [petals, setPetals] = useState<Petal[]>([])
-  const [showToast, setShowToast] = useState(false)
-
-  useEffect(() => {
-    if (!activated) return
-    setPetals(makePetals())
-    setShowToast(true)
-    const t = setTimeout(() => setShowToast(false), 3500)
-    return () => clearTimeout(t)
-  }, [activated])
+  const petals = useMemo(() => (activated ? makePetals() : []), [activated])
 
   if (!activated) return null
 
@@ -65,15 +56,13 @@ export function KonamiEasterEgg() {
       </div>
 
       {/* 토스트 */}
-      {showToast && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[101] animate-[toastIn_0.4s_ease-out]">
-          <div className="flex items-center gap-2 rounded-full border border-accent-300/40 bg-gray-950/90 dark:bg-gray-950/90 backdrop-blur-md px-5 py-3 text-sm text-accent-300 shadow-lg shadow-accent-900/20">
-            <span>🎮</span>
-            <span className="font-medium">Konami Code unlocked!</span>
-            <span className="text-gray-500 text-xs">you found the secret 🌸</span>
-          </div>
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[101] animate-[toastIn_0.4s_ease-out]">
+        <div className="flex items-center gap-2 rounded-full border border-accent-300/40 bg-gray-950/90 dark:bg-gray-950/90 backdrop-blur-md px-5 py-3 text-sm text-accent-300 shadow-lg shadow-accent-900/20">
+          <span>🎮</span>
+          <span className="font-medium">Konami Code unlocked!</span>
+          <span className="text-gray-500 text-xs">you found the secret 🌸</span>
         </div>
-      )}
+      </div>
     </>
   )
 }
