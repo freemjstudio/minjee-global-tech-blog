@@ -1,4 +1,4 @@
-import { isSupabaseConfigured, supabase } from '@/shared/api/supabaseClient'
+import { isSupabaseConfigured, supabaseRequest } from '@/shared/api/supabaseClient'
 import type { PostStats } from '../model/postStats.types'
 
 interface PostStatsRow {
@@ -17,55 +17,52 @@ function fromRow(row: PostStatsRow): PostStats {
   }
 }
 
+function normalizeRpcRow(data: PostStatsRow | PostStatsRow[] | null): PostStats | null {
+  if (!data) return null
+  return fromRow(Array.isArray(data) ? data[0] : data)
+}
+
+function encodeInFilter(values: string[]) {
+  return values.map((value) => `"${value.replaceAll('"', '\\"')}"`).join(',')
+}
+
 export const postStatsApi = {
   isEnabled: isSupabaseConfigured,
 
   get: async (slug: string): Promise<PostStats | null> => {
-    if (!supabase) return null
-
-    const { data, error } = await supabase
-      .from('post_stats')
-      .select('slug, views, likes, updated_at')
-      .eq('slug', slug)
-      .maybeSingle<PostStatsRow>()
-
-    if (error) throw error
-    return data ? fromRow(data) : null
+    const params = new URLSearchParams({
+      select: 'slug,views,likes,updated_at',
+      slug: `eq.${slug}`,
+    })
+    const rows = await supabaseRequest<PostStatsRow[]>(`/rest/v1/post_stats?${params.toString()}`)
+    return rows?.[0] ? fromRow(rows[0]) : null
   },
 
   getMany: async (slugs: string[]): Promise<Record<string, PostStats>> => {
-    if (!supabase || slugs.length === 0) return {}
+    if (slugs.length === 0) return {}
 
-    const { data, error } = await supabase
-      .from('post_stats')
-      .select('slug, views, likes, updated_at')
-      .in('slug', slugs)
-      .returns<PostStatsRow[]>()
+    const params = new URLSearchParams({
+      select: 'slug,views,likes,updated_at',
+      slug: `in.(${encodeInFilter(slugs)})`,
+    })
+    const rows = await supabaseRequest<PostStatsRow[]>(`/rest/v1/post_stats?${params.toString()}`)
 
-    if (error) throw error
-
-    return Object.fromEntries((data ?? []).map((row) => [row.slug, fromRow(row)]))
+    return Object.fromEntries((rows ?? []).map((row) => [row.slug, fromRow(row)]))
   },
 
   incrementView: async (slug: string): Promise<PostStats | null> => {
-    if (!supabase) return null
-
-    const { data, error } = await supabase
-      .rpc('increment_post_view', { post_slug: slug })
-      .single<PostStatsRow>()
-
-    if (error) throw error
-    return data ? fromRow(data) : null
+    const row = await supabaseRequest<PostStatsRow | PostStatsRow[]>('/rest/v1/rpc/increment_post_view', {
+      method: 'POST',
+      body: { post_slug: slug },
+    })
+    return normalizeRpcRow(row)
   },
 
   incrementLike: async (slug: string): Promise<PostStats | null> => {
-    if (!supabase) return null
-
-    const { data, error } = await supabase
-      .rpc('increment_post_like', { post_slug: slug })
-      .single<PostStatsRow>()
-
-    if (error) throw error
-    return data ? fromRow(data) : null
+    const row = await supabaseRequest<PostStatsRow | PostStatsRow[]>('/rest/v1/rpc/increment_post_like', {
+      method: 'POST',
+      body: { post_slug: slug },
+    })
+    return normalizeRpcRow(row)
   },
 }

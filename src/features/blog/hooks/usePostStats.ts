@@ -32,7 +32,8 @@ function setViewed(slug: string) {
 
 export function usePostStats(slug: string, fallback: Pick<PostStats, 'views' | 'likes'>) {
   const queryClient = useQueryClient()
-  const [liked, setLikedState] = useState(() => getLiked(slug))
+  const [likedOverrides, setLikedOverrides] = useState<Record<string, boolean>>({})
+  const liked = likedOverrides[slug] ?? getLiked(slug)
 
   const fallbackStats = useMemo<PostStats>(
     () => ({ slug, views: fallback.views, likes: fallback.likes }),
@@ -60,10 +61,6 @@ export function usePostStats(slug: string, fallback: Pick<PostStats, 'views' | '
   })
 
   useEffect(() => {
-    setLikedState(getLiked(slug))
-  }, [slug])
-
-  useEffect(() => {
     if (!slug || !postStatsApi.isEnabled || getViewed(slug) || isViewing) return
 
     setViewed(slug)
@@ -74,7 +71,7 @@ export function usePostStats(slug: string, fallback: Pick<PostStats, 'views' | '
     if (!slug || liked || isLiking) return
 
     setLiked(slug)
-    setLikedState(true)
+    setLikedOverrides((current) => ({ ...current, [slug]: true }))
 
     if (!postStatsApi.isEnabled) {
       queryClient.setQueryData<PostStats>(['post-stats', slug], (current) => ({
