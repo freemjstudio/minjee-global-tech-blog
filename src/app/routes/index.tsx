@@ -3,6 +3,7 @@ import { Navbar } from '@/shared/layout/Navbar'
 import { HomePage } from '@/features/home/page/HomePage'
 import { BlogPage } from '@/features/blog/page/BlogPage'
 import { PostPage } from '@/features/blog/page/PostPage'
+import { GraphPage } from '@/features/blog/page/GraphPage'
 import { SearchPage } from '@/features/search/page/SearchPage'
 import { AboutPage } from '@/features/about/page/AboutPage'
 import { ProjectsPage } from '@/features/projects/page/ProjectsPage'
@@ -41,6 +42,7 @@ export function AppRoutes() {
       <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
       <Route path="/blog" element={<MainLayout><BlogPage /></MainLayout>} />
       <Route path="/blog/:slug" element={<MainLayout><PostPage /></MainLayout>} />
+      <Route path="/graph" element={<MainLayout><GraphPage /></MainLayout>} />
       <Route path="/projects" element={<MainLayout><ProjectsPage /></MainLayout>} />
       <Route path="/journey" element={<MainLayout><JourneyPage /></MainLayout>} />
       <Route path="/now" element={<MainLayout><NowPage /></MainLayout>} />

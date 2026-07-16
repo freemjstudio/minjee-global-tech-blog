@@ -35,6 +35,7 @@ export interface PostSummary {
   readingTimeMinutes: number
   publishedAt: string
   thumbnailUrl?: string
+  relatedSlugs?: string[]
 }
 
 export interface Post extends PostSummary {
@@ -60,4 +61,27 @@ export interface PageResponse<T> {
   totalElements: number
   totalPages: number
   last: boolean
+}
+
+export interface PostGraphNode {
+  id: string
+  title: string
+  slug: string
+  category?: Category
+  tags: Tag[]
+  publishedAt: string
+  readingTimeMinutes: number
+}
+
+export interface PostGraphEdge {
+  source: string
+  target: string
+  type: 'related' | 'tag' | 'category'
+  label?: string
+  weight: number
+}
+
+export interface PostGraph {
+  nodes: PostGraphNode[]
+  edges: PostGraphEdge[]
 }

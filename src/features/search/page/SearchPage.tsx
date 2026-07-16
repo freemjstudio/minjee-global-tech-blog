@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useSearch } from '@/features/search/hooks/useSearch'
+import { usePostStatsMap } from '@/features/blog/hooks/usePostStats'
 import { PostCard } from '@/features/blog/ui/PostCard'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { Input } from '@/shared/ui/Input'
@@ -9,6 +10,7 @@ export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') ?? ''
   const { query, setQuery, debouncedQuery, data, isLoading } = useSearch(initialQuery)
+  const statsMap = usePostStatsMap(data?.content ?? [])
 
   useEffect(() => {
     if (debouncedQuery) setSearchParams({ q: debouncedQuery })
@@ -35,7 +37,7 @@ export function SearchPage() {
           ) : data?.content.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 text-sm">No results for "{debouncedQuery}"</p>
           ) : (
-            data?.content.map((post) => <PostCard key={post.id} post={post} />)
+            data?.content.map((post) => <PostCard key={post.id} post={post} stats={statsMap[post.slug]} />)
           )}
         </div>
       )}

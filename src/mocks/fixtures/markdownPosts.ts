@@ -1,18 +1,26 @@
-import type { Category, Post, PostSummary, Tag } from '@/features/blog/model/post.types'
+import type { Category, Post, PostGraph, PostGraphEdge, PostSummary, Tag } from '@/features/blog/model/post.types'
 import { categories } from './categories'
 import { tags } from './tags'
 
-type FrontmatterValue = string | number | string[] | undefined
+type FrontmatterValue = boolean | string | number | string[] | undefined
 
 interface MarkdownFrontmatter {
   title?: string
   slug?: string
   excerpt?: string
+  description?: string
   category?: string
   tags?: string[]
+  related?: string[]
   publishedAt?: string
+  date?: string
+  published?: boolean
   viewCount?: number
   likeCount?: number
+}
+
+type ParsedMarkdownPost = PostSummary & {
+  content: string
 }
 
 const markdownModules = import.meta.glob('/content/posts/*.md', {
@@ -42,6 +50,8 @@ function parseValue(raw: string): FrontmatterValue {
   }
 
   if (/^\d+$/.test(value)) return Number(value)
+  if (value === 'true') return true
+  if (value === 'false') return false
 
   return value.replace(/^["']|["']$/g, '')
 }
@@ -50,13 +60,26 @@ function parseMarkdown(raw: string): { frontmatter: MarkdownFrontmatter; content
   const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/)
   if (!match) return { frontmatter: {}, content: raw.trim() }
 
+  let activeArrayKey: string | undefined
   const frontmatter = match[1].split('\n').reduce<Record<string, FrontmatterValue>>((acc, line) => {
+    const listItem = line.match(/^\s*-\s+(.+)$/)
+    if (listItem && activeArrayKey) {
+      const current = acc[activeArrayKey]
+      acc[activeArrayKey] = [
+        ...(Array.isArray(current) ? current : []),
+        String(parseValue(listItem[1])),
+      ]
+      return acc
+    }
+
     const separatorIndex = line.indexOf(':')
     if (separatorIndex === -1) return acc
 
     const key = line.slice(0, separatorIndex).trim()
     const value = line.slice(separatorIndex + 1)
-    acc[key] = parseValue(value)
+    const parsedValue = parseValue(value)
+    acc[key] = parsedValue
+    activeArrayKey = value.trim() === '' ? key : undefined
     return acc
   }, {})
 
@@ -70,6 +93,10 @@ function resolveCategory(name?: string): Category | undefined {
   if (!name) return undefined
   const categorySlug = slugify(name)
   return categories.find((category) => category.slug === categorySlug || category.name === name)
+}
+
+function resolveCategoryFromTags(names: string[] = []): Category | undefined {
+  return names.map(resolveCategory).find(Boolean)
 }
 
 function resolveTags(names: string[] = []): Tag[] {
@@ -97,26 +124,29 @@ function excerptFromContent(content: string) {
     .slice(0, 180) ?? ''
 }
 
-const markdownPosts = Object.entries(markdownModules)
+const markdownPosts: ParsedMarkdownPost[] = Object.entries(markdownModules)
   .map(([path, raw], index) => {
     const { frontmatter, content } = parseMarkdown(raw)
     const fallbackSlug = path.split('/').pop()?.replace(/\.md$/, '') ?? `post-${index + 1}`
     const title = frontmatter.title ?? fallbackSlug
     const slug = frontmatter.slug ?? slugify(title)
 
+    const category = resolveCategory(frontmatter.category) ?? resolveCategoryFromTags(frontmatter.tags)
+
     const summary: PostSummary = {
       id: index + 1,
       title,
       slug,
-      excerpt: frontmatter.excerpt ?? excerptFromContent(content),
+      excerpt: frontmatter.excerpt ?? frontmatter.description ?? excerptFromContent(content),
       status: 'PUBLISHED',
-      category: resolveCategory(frontmatter.category),
+      category,
       tags: resolveTags(frontmatter.tags),
       viewCount: frontmatter.viewCount ?? 0,
       likeCount: frontmatter.likeCount ?? 0,
       commentCount: 0,
       readingTimeMinutes: estimateReadingTime(content),
-      publishedAt: frontmatter.publishedAt ?? new Date().toISOString(),
+      publishedAt: frontmatter.publishedAt ?? frontmatter.date ?? new Date().toISOString(),
+      relatedSlugs: frontmatter.related ?? [],
     }
 
     return {
@@ -126,7 +156,89 @@ const markdownPosts = Object.entries(markdownModules)
   })
   .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 
-export const markdownPostSummaries: PostSummary[] = markdownPosts.map(({ content: _content, ...summary }) => summary)
+function toPostSummary(post: ParsedMarkdownPost): PostSummary {
+  const summary = { ...post }
+  delete (summary as Partial<ParsedMarkdownPost>).content
+  return summary
+}
+
+function edgeKey(source: string, target: string) {
+  return [source, target].sort().join('::')
+}
+
+function addEdge(edges: Map<string, PostGraphEdge>, edge: PostGraphEdge) {
+  edges.set(edgeKey(edge.source, edge.target), edge)
+}
+
+function buildPostGraph(): PostGraph {
+  const nodes = markdownPosts.map((post) => ({
+    id: post.slug,
+    title: post.title,
+    slug: post.slug,
+    category: post.category,
+    tags: post.tags,
+    publishedAt: post.publishedAt,
+    readingTimeMinutes: post.readingTimeMinutes,
+  }))
+
+  const knownSlugs = new Set(nodes.map((node) => node.slug))
+  const edges = new Map<string, PostGraphEdge>()
+
+  markdownPosts.forEach((post) => {
+    post.relatedSlugs?.forEach((target) => {
+      if (!knownSlugs.has(target) || target === post.slug) return
+      addEdge(edges, {
+        source: post.slug,
+        target,
+        type: 'related',
+        label: 'related',
+        weight: 3,
+      })
+    })
+  })
+
+  for (let i = 0; i < markdownPosts.length; i += 1) {
+    for (let j = i + 1; j < markdownPosts.length; j += 1) {
+      const source = markdownPosts[i]
+      const target = markdownPosts[j]
+      const key = edgeKey(source.slug, target.slug)
+      if (edges.has(key)) continue
+
+      const sourceTags = new Set(source.tags.map((tag) => tag.slug))
+      const sharedTags = target.tags.filter((tag) => sourceTags.has(tag.slug))
+
+      if (sharedTags.length > 0) {
+        addEdge(edges, {
+          source: source.slug,
+          target: target.slug,
+          type: 'tag',
+          label: sharedTags.map((tag) => tag.name).join(', '),
+          weight: sharedTags.length + 1,
+        })
+        continue
+      }
+
+      if (source.category?.slug && source.category.slug === target.category?.slug) {
+        addEdge(edges, {
+          source: source.slug,
+          target: target.slug,
+          type: 'category',
+          label: source.category.name,
+          weight: 1,
+        })
+      }
+    }
+  }
+
+  return {
+    nodes,
+    edges: Array.from(edges.values()),
+  }
+}
+
+export const markdownPostSummaries: PostSummary[] = markdownPosts.map(toPostSummary)
+
+export const markdownPostGraph: PostGraph = buildPostGraph()
 
 export const markdownPostDetails: Record<string, Post> = markdownPosts.reduce<Record<string, Post>>((acc, post, index) => {
   const previous = markdownPosts[index - 1]

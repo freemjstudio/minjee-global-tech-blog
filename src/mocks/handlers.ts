@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { postSummaries, postDetails } from './fixtures/posts'
+import { postSummaries, postDetails, postGraph } from './fixtures/posts'
 import { categories } from './fixtures/categories'
 import { tags } from './fixtures/tags'
 import { resume } from './fixtures/resume'
@@ -46,6 +46,9 @@ export const handlers = [
     )
     return ok({ content: results, page: 0, size: 10, totalElements: results.length, totalPages: 1, last: true })
   }),
+
+  // Posts — relation graph
+  http.get(`${BASE}/posts/graph`, () => ok(postGraph)),
 
   // Posts — 상세 (slug)
   http.get(`${BASE}/posts/:slug`, ({ params }) => {

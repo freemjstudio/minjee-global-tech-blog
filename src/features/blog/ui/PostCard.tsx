@@ -5,9 +5,16 @@ import type { PostSummary } from '../model/post.types'
 
 interface PostCardProps {
   post: PostSummary
+  stats?: {
+    views: number
+    likes: number
+  }
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, stats }: PostCardProps) {
+  const viewCount = stats?.views ?? post.viewCount
+  const likeCount = stats?.likes ?? post.likeCount
+
   return (
     <article className="group rounded-xl border border-gray-200 bg-white p-6 shadow-[0_1px_12px_rgba(31,41,55,0.03)] transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 dark:border-gray-800 dark:bg-gray-900/70">
       <Link to={`/blog/${post.slug}`} className="block space-y-4">
@@ -36,8 +43,8 @@ export function PostCard({ post }: PostCardProps) {
             ))}
           </div>
           <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
-            <span>{post.viewCount.toLocaleString()} views</span>
-            <span>♥ {post.likeCount}</span>
+            <span>{viewCount.toLocaleString()} views</span>
+            <span>♥ {likeCount.toLocaleString()}</span>
           </div>
         </div>
       </Link>

@@ -1,5 +1,5 @@
 import { httpClient } from '@/shared/api/httpClient'
-import type { Post, PostSummary, PostListParams, PageResponse } from '../model/post.types'
+import type { Post, PostGraph, PostSummary, PostListParams, PageResponse } from '../model/post.types'
 
 interface ApiResponse<T> {
   success: boolean
@@ -22,6 +22,11 @@ export const postApi = {
     const { data } = await httpClient.get<ApiResponse<PageResponse<PostSummary>>>('/posts/search', {
       params: { q, page },
     })
+    return data.data
+  },
+
+  graph: async (): Promise<PostGraph> => {
+    const { data } = await httpClient.get<ApiResponse<PostGraph>>('/posts/graph')
     return data.data
   },
 

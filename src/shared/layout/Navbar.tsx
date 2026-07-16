@@ -6,6 +6,7 @@ import { ElenaLogo } from '@/shared/ui/ElenaLogo'
 
 const NAV_LINKS = [
   { to: '/blog', label: 'Blog' },
+  { to: '/graph', label: 'Graph' },
   { to: '/projects', label: 'Projects' },
   { to: '/journey', label: 'Journey' },
   { to: '/now', label: 'Now' },
@@ -14,6 +15,7 @@ const NAV_LINKS = [
 
 const PALETTE_ITEMS = [
   { label: 'Read technical writing', to: '/blog' },
+  { label: 'Open the knowledge map', to: '/graph' },
   { label: 'Explore project case studies', to: '/projects' },
   { label: 'View the journey timeline', to: '/journey' },
   { label: 'See what is current', to: '/now' },

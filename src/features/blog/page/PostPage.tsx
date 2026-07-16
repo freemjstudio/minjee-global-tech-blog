@@ -7,11 +7,16 @@ import { TableOfContents } from '@/features/blog/ui/TableOfContents'
 import { ReadingProgressBar } from '@/features/blog/ui/ReadingProgressBar'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { useScrollCompletion } from '@/shared/hooks/useScrollCompletion'
+import { usePostStats } from '@/features/blog/hooks/usePostStats'
 
 export function PostPage() {
   const { slug } = useParams<{ slug: string }>()
   const { data: post, isLoading, isError } = usePost(slug ?? '')
   const { sentinelRef, completed } = useScrollCompletion()
+  const postStats = usePostStats(post?.slug ?? slug ?? '', {
+    views: post?.viewCount ?? 0,
+    likes: post?.likeCount ?? 0,
+  })
 
   if (isLoading) {
     return (
@@ -38,7 +43,13 @@ export function PostPage() {
       <ReadingProgressBar />
       <div className="mx-auto grid max-w-6xl gap-12 xl:grid-cols-[minmax(0,760px)_220px]">
         <article className="min-w-0">
-          <PostMeta post={post} />
+          <PostMeta
+            post={post}
+            stats={postStats.stats}
+            liked={postStats.liked}
+            onLike={postStats.like}
+            isLiking={postStats.isLiking}
+          />
           <PostDetail post={post} />
 
           {/* Prev / Next */}

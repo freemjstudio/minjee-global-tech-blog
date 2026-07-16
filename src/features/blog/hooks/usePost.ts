@@ -7,6 +7,7 @@ export const postKeys = {
   list: (params: PostListParams) => ['posts', 'list', params] as const,
   detail: (slug: string) => ['posts', 'detail', slug] as const,
   search: (q: string, page: number) => ['posts', 'search', q, page] as const,
+  graph: ['posts', 'graph'] as const,
 }
 
 export function usePostList(params: PostListParams) {
@@ -29,6 +30,13 @@ export function usePostSearch(q: string, page = 0) {
     queryKey: postKeys.search(q, page),
     queryFn: () => postApi.search(q, page),
     enabled: q.length >= 2,
+  })
+}
+
+export function usePostGraph() {
+  return useQuery({
+    queryKey: postKeys.graph,
+    queryFn: postApi.graph,
   })
 }
 

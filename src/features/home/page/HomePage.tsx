@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Boxes, GitBranch, Globe2 } from 'lucide-react'
 import { usePostList } from '@/features/blog/hooks/usePost'
+import { usePostStatsMap } from '@/features/blog/hooks/usePostStats'
 import { PostCard } from '@/features/blog/ui/PostCard'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { Badge } from '@/shared/ui/Badge'
@@ -26,6 +27,7 @@ export function HomePage() {
   const posts = data?.content ?? []
   const featuredArticles = posts.slice(0, 3)
   const latestWriting = posts.slice(3, 6)
+  const statsMap = usePostStatsMap(posts)
 
   return (
     <div className="space-y-28">
@@ -60,7 +62,7 @@ export function HomePage() {
         <div className="grid gap-4 lg:grid-cols-3">
           {isLoading
             ? Array.from({ length: 3 }).map((_, i) => <PostCardSkeleton key={i} />)
-            : featuredArticles.map((post) => <PostCard key={post.id} post={post} />)}
+            : featuredArticles.map((post) => <PostCard key={post.id} post={post} stats={statsMap[post.slug]} />)}
         </div>
       </section>
 

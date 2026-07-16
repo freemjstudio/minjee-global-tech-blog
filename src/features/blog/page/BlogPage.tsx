@@ -4,6 +4,7 @@ import { PostCard } from '@/features/blog/ui/PostCard'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { Button } from '@/shared/ui/Button'
 import { Sidebar } from '@/features/blog/ui/Sidebar'
+import { usePostStatsMap } from '@/features/blog/hooks/usePostStats'
 
 export function BlogPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -18,6 +19,7 @@ export function BlogPage() {
     categorySlug,
     tagSlug,
   })
+  const statsMap = usePostStatsMap(data?.content ?? [])
 
   const setPage = (nextPage: number) => {
     const next = new URLSearchParams(searchParams)
@@ -48,7 +50,7 @@ export function BlogPage() {
         <div className="space-y-4">
           {isLoading
             ? Array.from({ length: 5 }).map((_, i) => <PostCardSkeleton key={i} />)
-            : data?.content.map((post) => <PostCard key={post.id} post={post} />)}
+            : data?.content.map((post) => <PostCard key={post.id} post={post} stats={statsMap[post.slug]} />)}
         </div>
 
         {data && data.totalPages > 1 && (
