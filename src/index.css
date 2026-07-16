@@ -102,6 +102,16 @@ code, pre, kbd, samp {
   margin: 2.5rem 0;
 }
 
+.article-prose :where(pre code),
+.article-prose :where(pre code span) {
+  background: transparent;
+}
+
+.article-prose :where(pre code)::before,
+.article-prose :where(pre code)::after {
+  content: none;
+}
+
 .article-prose :where(.callout) {
   background: #f7f8fa;
   border: 1px solid #e5e7eb;

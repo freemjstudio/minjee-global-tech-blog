@@ -31,7 +31,7 @@ export function PostDetail({ post }: PostDetailProps) {
             return <h3 id={slugify(children)}>{children}</h3>
           },
           code({ className, children, ...props }) {
-            const isBlock = className?.startsWith('language-')
+            const isBlock = className?.includes('language-')
             if (isBlock) {
               return <CodeBlock className={className}>{children}</CodeBlock>
             }
