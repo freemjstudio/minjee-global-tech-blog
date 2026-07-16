@@ -1,4 +1,4 @@
-import type { Category } from '@/features/post/model/post.types'
+import type { Category } from '@/features/blog/model/post.types'
 
 export const categories: Category[] = [
   { id: 1, name: 'Backend', slug: 'backend' },

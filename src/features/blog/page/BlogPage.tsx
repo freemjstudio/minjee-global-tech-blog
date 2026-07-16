@@ -1,11 +1,11 @@
 import { useSearchParams } from 'react-router-dom'
-import { usePostList } from '@/features/post/hooks/usePost'
-import { PostCard } from '@/features/post/ui/PostCard'
+import { usePostList } from '@/features/blog/hooks/usePost'
+import { PostCard } from '@/features/blog/ui/PostCard'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { Button } from '@/shared/ui/Button'
-import { Sidebar } from '@/widgets/Sidebar'
+import { Sidebar } from '@/features/blog/ui/Sidebar'
 
-export function PostListPage() {
+export function BlogPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page') ?? 0)
   const categorySlug = searchParams.get('category') ?? undefined

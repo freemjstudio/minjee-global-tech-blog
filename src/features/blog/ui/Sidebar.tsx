@@ -1,7 +1,7 @@
 import { NavLink, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { httpClient } from '@/shared/api/httpClient'
-import type { Category, Tag } from '@/features/post/model/post.types'
+import type { Category, Tag } from '@/features/blog/model/post.types'
 
 interface ApiResponse<T> { success: boolean; data: T }
 

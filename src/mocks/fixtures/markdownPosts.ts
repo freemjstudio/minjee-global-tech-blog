@@ -1,4 +1,4 @@
-import type { Category, Post, PostSummary, Tag } from '@/features/post/model/post.types'
+import type { Category, Post, PostSummary, Tag } from '@/features/blog/model/post.types'
 import { categories } from './categories'
 import { tags } from './tags'
 

@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useSearch } from '@/features/search/hooks/useSearch'
-import { PostCard } from '@/features/post/ui/PostCard'
+import { PostCard } from '@/features/blog/ui/PostCard'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { Input } from '@/shared/ui/Input'
 

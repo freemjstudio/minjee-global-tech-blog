@@ -1,4 +1,4 @@
-import type { Tag } from '@/features/post/model/post.types'
+import type { Tag } from '@/features/blog/model/post.types'
 
 export const tags: Tag[] = [
   { id: 1,  name: 'kotlin',          slug: 'kotlin' },

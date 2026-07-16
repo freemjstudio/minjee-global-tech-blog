@@ -1,14 +1,14 @@
 import { useParams, Link } from 'react-router-dom'
-import { usePost } from '@/features/post/hooks/usePost'
-import { PostMeta } from '@/features/post/ui/PostMeta'
-import { PostDetail } from '@/features/post/ui/PostDetail'
-import { PostReadCompletion } from '@/features/post/ui/PostReadCompletion'
-import { TableOfContents } from '@/widgets/TableOfContents'
-import { ReadingProgressBar } from '@/widgets/ReadingProgressBar'
+import { usePost } from '@/features/blog/hooks/usePost'
+import { PostMeta } from '@/features/blog/ui/PostMeta'
+import { PostDetail } from '@/features/blog/ui/PostDetail'
+import { PostReadCompletion } from '@/features/blog/ui/PostReadCompletion'
+import { TableOfContents } from '@/features/blog/ui/TableOfContents'
+import { ReadingProgressBar } from '@/features/blog/ui/ReadingProgressBar'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { useScrollCompletion } from '@/shared/hooks/useScrollCompletion'
 
-export function PostDetailPage() {
+export function PostPage() {
   const { slug } = useParams<{ slug: string }>()
   const { data: post, isLoading, isError } = usePost(slug ?? '')
   const { sentinelRef, completed } = useScrollCompletion()

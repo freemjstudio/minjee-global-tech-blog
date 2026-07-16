@@ -1,13 +1,13 @@
 import { Navigate, Routes, Route } from 'react-router-dom'
-import { Navbar } from '@/widgets/Navbar'
-import { HomePage } from '@/pages/HomePage'
-import { PostListPage } from '@/pages/blog/PostListPage'
-import { PostDetailPage } from '@/pages/blog/PostDetailPage'
-import { SearchPage } from '@/pages/SearchPage'
-import { AboutPage } from '@/pages/AboutPage'
-import { ProjectsPage } from '@/pages/ProjectsPage'
-import { JourneyPage } from '@/pages/JourneyPage'
-import { NowPage } from '@/pages/NowPage'
+import { Navbar } from '@/shared/layout/Navbar'
+import { HomePage } from '@/features/home/page/HomePage'
+import { BlogPage } from '@/features/blog/page/BlogPage'
+import { PostPage } from '@/features/blog/page/PostPage'
+import { SearchPage } from '@/features/search/page/SearchPage'
+import { AboutPage } from '@/features/about/page/AboutPage'
+import { ProjectsPage } from '@/features/projects/page/ProjectsPage'
+import { JourneyPage } from '@/features/journey/page/JourneyPage'
+import { NowPage } from '@/features/now/page/NowPage'
 import { ProtectedRoute } from '@/features/auth/ui/ProtectedRoute'
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -39,8 +39,8 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
-      <Route path="/blog" element={<MainLayout><PostListPage /></MainLayout>} />
-      <Route path="/blog/:slug" element={<MainLayout><PostDetailPage /></MainLayout>} />
+      <Route path="/blog" element={<MainLayout><BlogPage /></MainLayout>} />
+      <Route path="/blog/:slug" element={<MainLayout><PostPage /></MainLayout>} />
       <Route path="/projects" element={<MainLayout><ProjectsPage /></MainLayout>} />
       <Route path="/journey" element={<MainLayout><JourneyPage /></MainLayout>} />
       <Route path="/now" element={<MainLayout><NowPage /></MainLayout>} />

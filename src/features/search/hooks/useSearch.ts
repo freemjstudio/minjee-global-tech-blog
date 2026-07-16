@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { usePostSearch } from '@/features/post/hooks/usePost'
+import { usePostSearch } from '@/features/blog/hooks/usePost'
 
 export function useSearch(initialQuery = '') {
   const [query, setQuery] = useState(initialQuery)
