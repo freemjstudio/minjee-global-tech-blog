@@ -67,6 +67,7 @@ export interface PostGraphNode {
   id: string
   title: string
   slug: string
+  excerpt: string
   category?: Category
   tags: Tag[]
   publishedAt: string

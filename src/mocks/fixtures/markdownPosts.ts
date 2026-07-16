@@ -175,6 +175,7 @@ function buildPostGraph(): PostGraph {
     id: post.slug,
     title: post.title,
     slug: post.slug,
+    excerpt: post.excerpt,
     category: post.category,
     tags: post.tags,
     publishedAt: post.publishedAt,
