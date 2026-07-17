@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, BookOpen, CircleDot, Network, Tags } from 'lucide-react'
 import { Badge } from '@/shared/ui/Badge'
 import { formatDateShort } from '@/shared/lib/formatDate'
@@ -7,6 +8,25 @@ import type { Category, PostGraph as PostGraphData, PostGraphNode, Tag } from '.
 
 const WIDTH = 980
 const HEIGHT = 660
+const HIGH_LEVEL_TOPIC_SLUGS = [
+  'distributed-systems',
+  'kafka',
+  'spark',
+  'backend',
+  'system-design',
+  'architecture',
+]
+
+const TOPIC_LABELS: Record<string, string> = {
+  spark: 'Apache Spark',
+  kafka: 'Kafka',
+  backend: 'Backend',
+  architecture: 'Architecture',
+  'system-design': 'System Design',
+  'distributed-systems': 'Distributed Systems',
+  'data-engineering': 'Data Engineering',
+  'spring-boot': 'Spring Boot',
+}
 
 const TOPIC_COLORS: Record<string, { fill: string; stroke: string; text: string }> = {
   'distributed-systems': { fill: '#CCFBF1', stroke: '#2DD4BF', text: '#0F766E' },
@@ -90,7 +110,7 @@ function articleTopics(article: PostGraphNode) {
   if (article.category) {
     topics.set(article.category.slug, {
       slug: article.category.slug,
-      title: article.category.name,
+      title: TOPIC_LABELS[article.category.slug] ?? article.category.name,
       category: article.category,
     })
   }
@@ -98,7 +118,7 @@ function articleTopics(article: PostGraphNode) {
   article.tags.forEach((tag) => {
     topics.set(tag.slug, {
       slug: tag.slug,
-      title: tag.name,
+      title: TOPIC_LABELS[tag.slug] ?? tag.name,
       category: article.category,
     })
   })
@@ -130,11 +150,18 @@ function buildKnowledgeGraph(graph: PostGraphData): KnowledgeGraph {
   })
 
   const sortedTopics = Array.from(topicMap.values()).sort((a, b) => {
+    const aPriority = HIGH_LEVEL_TOPIC_SLUGS.indexOf(a.slug)
+    const bPriority = HIGH_LEVEL_TOPIC_SLUGS.indexOf(b.slug)
+    if (aPriority !== -1 || bPriority !== -1) {
+      if (aPriority === -1) return 1
+      if (bPriority === -1) return -1
+      return aPriority - bPriority
+    }
     const byCount = b.articleSlugs.length - a.articleSlugs.length
     return byCount === 0 ? a.title.localeCompare(b.title) : byCount
   })
 
-  const primaryTopics = sortedTopics.slice(0, 10)
+  const primaryTopics = sortedTopics.slice(0, Math.max(6, Math.min(10, sortedTopics.length)))
   const topicRadius = 230
   const topics: TopicNode[] = primaryTopics.map((topic, index) => {
     const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(primaryTopics.length, 1)
@@ -242,6 +269,22 @@ function getConnectedIds(node: KnowledgeNode, graph: KnowledgeGraph) {
   return ids
 }
 
+function getVisibleIds(node: KnowledgeNode, graph: KnowledgeGraph) {
+  const ids = new Set<string>()
+  graph.topics.forEach((topic) => ids.add(topic.id))
+
+  if (node.type === 'topic') {
+    node.articleSlugs.forEach((slug) => ids.add(`article:${slug}`))
+    node.relatedTopicSlugs.forEach((slug) => ids.add(`topic:${slug}`))
+    return ids
+  }
+
+  ids.add(node.id)
+  node.topicSlugs.forEach((slug) => ids.add(`topic:${slug}`))
+  rankRelatedArticles(node, graph).forEach((article) => ids.add(article.id))
+  return ids
+}
+
 function nodeConnectionCount(node: KnowledgeNode) {
   if (node.type === 'topic') return node.articleSlugs.length + node.relatedTopicSlugs.length
   return node.topicSlugs.length + node.relatedArticleSlugs.length
@@ -260,12 +303,32 @@ function relatedArticlesFor(node: KnowledgeNode, graph: KnowledgeGraph) {
   if (node.type === 'topic') {
     return node.articleSlugs
       .map((slug) => graph.articles.find((article) => article.slug === slug))
-      .filter(Boolean) as ArticleNode[]
+      .filter(Boolean)
+      .sort((a, b) => nodeConnectionCount(b as ArticleNode) - nodeConnectionCount(a as ArticleNode)) as ArticleNode[]
   }
 
-  return node.relatedArticleSlugs
+  return rankRelatedArticles(node, graph)
+}
+
+function rankRelatedArticles(node: ArticleNode, graph: KnowledgeGraph) {
+  const explicit = node.relatedArticleSlugs
     .map((slug) => graph.articles.find((article) => article.slug === slug))
     .filter(Boolean) as ArticleNode[]
+
+  if (explicit.length > 0) {
+    return explicit.sort((a, b) => nodeConnectionCount(b) - nodeConnectionCount(a))
+  }
+
+  return graph.articles
+    .filter((article) => article.slug !== node.slug)
+    .map((article) => ({
+      article,
+      score: article.topicSlugs.filter((slug) => node.topicSlugs.includes(slug)).length,
+    }))
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || nodeConnectionCount(b.article) - nodeConnectionCount(a.article))
+    .map(({ article }) => article)
+    .slice(0, 4)
 }
 
 function relatedTopicsFor(node: KnowledgeNode, graph: KnowledgeGraph) {
@@ -291,6 +354,7 @@ export function PostGraph({ graph }: PostGraphProps) {
   )
   const selectedNode = nodeById.get(selectedId) ?? knowledgeGraph.topics[0] ?? knowledgeGraph.articles[0]
   const connectedIds = selectedNode ? getConnectedIds(selectedNode, knowledgeGraph) : new Set<string>()
+  const visibleIds = selectedNode ? getVisibleIds(selectedNode, knowledgeGraph) : new Set<string>()
   const relatedArticles = selectedNode ? relatedArticlesFor(selectedNode, knowledgeGraph) : []
   const relatedTopics = selectedNode ? relatedTopicsFor(selectedNode, knowledgeGraph) : []
 
@@ -317,15 +381,16 @@ export function PostGraph({ graph }: PostGraphProps) {
           aria-label="Topic-first knowledge graph"
           className="aspect-[14/10] w-full bg-[#fbfbfa] dark:bg-gray-950"
         >
-          <g>
+          <motion.g initial={false}>
             {knowledgeGraph.edges.map((edge) => {
               const source = nodeById.get(edge.source)
               const target = nodeById.get(edge.target)
               if (!source || !target) return null
 
               const active = connectedIds.has(edge.source) && connectedIds.has(edge.target)
+              const visible = visibleIds.has(edge.source) && visibleIds.has(edge.target)
               return (
-                <line
+                <motion.line
                   key={`${edge.source}-${edge.target}-${edge.type}`}
                   x1={source.x}
                   y1={source.y}
@@ -333,30 +398,38 @@ export function PostGraph({ graph }: PostGraphProps) {
                   y2={target.y}
                   stroke={edge.type === 'topic-topic' ? '#9CA3AF' : '#D1D5DB'}
                   strokeWidth={active ? 1.8 : 1}
-                  strokeOpacity={active ? 0.62 : 0.2}
+                  initial={false}
+                  animate={{ opacity: visible ? (active ? 0.62 : 0.22) : 0 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
                 />
               )
             })}
-          </g>
+          </motion.g>
 
           <g>
             {knowledgeGraph.nodes.map((node) => {
               const isTopic = node.type === 'topic'
               const selected = node.id === selectedNode.id
+              const visible = visibleIds.has(node.id)
               const connected = connectedIds.has(node.id)
               const color = isTopic
                 ? topicColor(node.slug)
                 : topicColor(node.category?.slug ?? node.topicSlugs[0] ?? '')
               const radius = isTopic ? (selected ? 25 : 21) : selected ? 11 : 8
+              const shouldRender = isTopic || visible
 
+              if (!shouldRender) return null
               return (
-                <g
+                <motion.g
                   key={node.id}
                   role="button"
                   tabIndex={0}
                   aria-label={node.title}
                   className="cursor-pointer outline-none"
-                  opacity={connected ? 1 : 0.22}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: connected || isTopic ? 1 : 0.24, scale: selected ? 1.03 : 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
                   onClick={() => setSelectedId(node.id)}
                   onMouseEnter={(event) => {
                     const bounds = event.currentTarget.ownerSVGElement?.getBoundingClientRect()
@@ -372,32 +445,35 @@ export function PostGraph({ graph }: PostGraphProps) {
                   }}
                 >
                   {isTopic && (
-                    <circle
+                    <motion.circle
                       cx={node.x}
                       cy={node.y}
-                      r={radius + 9}
+                      animate={{ r: radius + 9, opacity: selected ? 0.24 : 0.12 }}
                       fill={color.fill}
-                      opacity={selected ? 0.24 : 0.12}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
                     />
                   )}
-                  <circle
+                  <motion.circle
                     cx={node.x}
                     cy={node.y}
-                    r={radius}
+                    animate={{ r: radius }}
                     fill={isTopic ? color.fill : '#FFFFFF'}
                     stroke={selected ? color.stroke : isTopic ? color.stroke : color.fill}
                     strokeWidth={selected ? 3 : isTopic ? 2 : 1.6}
                     className="transition-all dark:fill-gray-950"
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
                   />
-                  <text
-                    x={node.x}
-                    y={node.y + (isTopic ? 42 : 27)}
-                    textAnchor="middle"
-                    className={`select-none ${isTopic ? 'text-[17px] font-semibold' : 'text-[12px] font-medium'} fill-gray-700 dark:fill-gray-200`}
-                  >
-                    {shortLabel(node.title, isTopic ? 22 : 28)}
-                  </text>
-                </g>
+                  {(isTopic || selected) && (
+                    <text
+                      x={node.x}
+                      y={node.y + (isTopic ? 42 : 29)}
+                      textAnchor="middle"
+                      className={`select-none ${isTopic ? 'text-[17px] font-semibold' : 'text-[12px] font-medium'} fill-gray-700 dark:fill-gray-200`}
+                    >
+                      {shortLabel(node.title, isTopic ? 22 : 32)}
+                    </text>
+                  )}
+                </motion.g>
               )
             })}
           </g>
@@ -427,12 +503,15 @@ export function PostGraph({ graph }: PostGraphProps) {
         )}
       </section>
 
-      <ExplorerPanel
-        node={selectedNode}
-        relatedArticles={relatedArticles}
-        relatedTopics={relatedTopics}
-        onSelect={(id) => setSelectedId(id)}
-      />
+      <AnimatePresence mode="wait">
+        <ExplorerPanel
+          key={selectedNode.id}
+          node={selectedNode}
+          relatedArticles={relatedArticles}
+          relatedTopics={relatedTopics}
+          onSelect={(id) => setSelectedId(id)}
+        />
+      </AnimatePresence>
     </div>
   )
 }
@@ -451,7 +530,13 @@ function ExplorerPanel({
   const category = node.category
 
   return (
-    <aside className="rounded-xl border border-gray-200 bg-white p-6 shadow-[0_1px_14px_rgba(31,41,55,0.04)] dark:border-gray-800 dark:bg-gray-950">
+    <motion.aside
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className="rounded-xl border border-gray-200 bg-white p-6 shadow-[0_1px_14px_rgba(31,41,55,0.04)] dark:border-gray-800 dark:bg-gray-950"
+    >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent-600 dark:text-accent-300">
         {node.type === 'topic' ? <CircleDot className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
         Explorer
@@ -521,7 +606,7 @@ function ExplorerPanel({
           onSelect={onSelect}
         />
       )}
-    </aside>
+    </motion.aside>
   )
 }
 
