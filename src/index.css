@@ -51,7 +51,7 @@ code, pre, kbd, samp {
 .article-prose {
   color: #374151;
   font-size: 1.0625rem;
-  line-height: 1.9;
+  line-height: 1.72;
 }
 
 .article-prose :where(h2) {
@@ -74,8 +74,8 @@ code, pre, kbd, samp {
 }
 
 .article-prose :where(p, ul, ol) {
-  margin-top: 1.25rem;
-  margin-bottom: 1.25rem;
+  margin-top: 0.85rem;
+  margin-bottom: 0.85rem;
 }
 
 .article-prose :where(strong) {
