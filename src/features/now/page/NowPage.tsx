@@ -3,15 +3,15 @@ import { Badge } from '@/shared/ui/Badge'
 
 const CURRENTLY = [
   {
-    text: 'Building backend systems at CJ OliveYoung US Local Mall',
+    text: 'Building global e-commerce core systems at CJ OliveYoung global mall & US local mall',
     icon: BriefcaseBusiness,
   },
   {
-    text: 'Reading Designing Domain-Driven Design',
+    text: 'Reading Designing Domain-Driven Design & Kotlin In Action',
     icon: BookOpen,
   },
   {
-    text: 'Preparing for overseas software engineering interviews',
+    text: 'Working toward an international software engineering career.',
     icon: Globe2,
   },
 ]

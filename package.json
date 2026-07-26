@@ -7,13 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run lint && npm run build && npx vercel --prod --yes",
+    "deploy:preview": "npm run lint && npm run build && npx vercel --yes"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.4",
     "@tanstack/react-query-devtools": "^5.100.4",
     "axios": "^1.15.2",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.42.2",
     "lucide-react": "^1.24.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -23,8 +26,7 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0",
-    "zustand": "^5.0.12",
-    "framer-motion": "^12.42.2"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

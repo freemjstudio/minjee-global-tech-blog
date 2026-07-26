@@ -38,6 +38,12 @@ function slugify(value: string) {
     .replace(/\s+/g, '-')
 }
 
+function stableNumericId(value: string) {
+  return Array.from(value).reduce((hash, char) => {
+    return ((hash << 5) - hash + char.charCodeAt(0)) >>> 0
+  }, 0)
+}
+
 function parseValue(raw: string): FrontmatterValue {
   const value = raw.trim()
 
@@ -100,10 +106,10 @@ function resolveCategoryFromTags(names: string[] = []): Category | undefined {
 }
 
 function resolveTags(names: string[] = []): Tag[] {
-  return names.map((name, index) => {
+  return names.map((name) => {
     const tagSlug = slugify(name)
     return tags.find((tag) => tag.slug === tagSlug || tag.name === name) ?? {
-      id: 1000 + index,
+      id: 1000 + stableNumericId(tagSlug),
       name,
       slug: tagSlug,
     }

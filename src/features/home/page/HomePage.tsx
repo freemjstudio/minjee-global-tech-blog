@@ -3,6 +3,7 @@ import { ArrowRight, Boxes, GitBranch, Globe2 } from 'lucide-react'
 import { usePostList } from '@/features/blog/hooks/usePost'
 import { usePostStatsMap } from '@/features/blog/hooks/usePostStats'
 import { PostCard } from '@/features/blog/ui/PostCard'
+import { markdownPostSummaries } from '@/mocks/fixtures/markdownPosts'
 import { PostCardSkeleton } from '@/shared/ui/Skeleton'
 import { Badge } from '@/shared/ui/Badge'
 import { formatDateShort } from '@/shared/lib/formatDate'
@@ -23,10 +24,10 @@ const FEATURED_PROJECTS = [
 ]
 
 export function HomePage() {
-  const { data, isLoading } = usePostList({ size: 6, status: 'PUBLISHED' })
-  const posts = data?.content ?? []
+  const { data, isLoading } = usePostList({ size: 9, status: 'PUBLISHED' })
+  const posts = data?.content?.length ? data.content : markdownPostSummaries
   const featuredArticles = posts.slice(0, 3)
-  const latestWriting = posts.slice(3, 6)
+  const latestWriting = posts.slice(0, 4)
   const statsMap = usePostStatsMap(posts)
 
   return (
@@ -41,12 +42,19 @@ export function HomePage() {
           </div>
 
           <h1 className="max-w-4xl text-5xl font-semibold leading-[1.05] tracking-normal text-gray-900 md:text-7xl dark:text-white">
-            Think deeply.
-            <span className="block text-gray-500 dark:text-gray-400">Engineer broadly.</span>
+            Always curious.
+            <span className="block text-gray-500 dark:text-gray-400">Always learning.</span>
+            <span className="block text-gray-500 dark:text-gray-400">Always building.</span>
           </h1>
 
           <p className="mt-8 max-w-2xl text-lg leading-8 text-gray-500 dark:text-gray-400">
-            Building reliable software through backend engineering, distributed systems, and data.
+            I believe great software starts
+            <br />
+            with curiosity,
+            <br />
+            grows through continuous learning,
+            <br />
+            and creates value through thoughtful engineering.
           </p>
         </div>
       </section>
@@ -109,7 +117,7 @@ export function HomePage() {
         </div>
         <div className="space-y-3">
           {isLoading
-            ? Array.from({ length: 3 }).map((_, i) => <PostCardSkeleton key={i} />)
+            ? Array.from({ length: 4 }).map((_, i) => <PostCardSkeleton key={i} />)
             : latestWriting.map((post) => (
                 <Link
                   key={post.id}

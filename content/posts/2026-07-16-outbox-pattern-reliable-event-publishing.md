@@ -4,7 +4,7 @@ slug: "outbox-pattern-reliable-event-publishing"
 excerpt: "A practical note on keeping database writes and Kafka event publishing consistent."
 category: "Distributed Systems"
 tags: ["kafka", "spring-boot", "transaction", "architecture"]
-related: ["beyond-dead-letter-queues"]
+related: ["outbox-pattern-dual-write"]
 publishedAt: "2026-07-16T09:00:00Z"
 viewCount: 0
 likeCount: 0

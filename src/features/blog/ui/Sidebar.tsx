@@ -1,27 +1,24 @@
 import { NavLink, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { httpClient } from '@/shared/api/httpClient'
 import type { Category, Tag } from '@/features/blog/model/post.types'
+import { postSummaries } from '@/mocks/fixtures/posts'
 
-interface ApiResponse<T> { success: boolean; data: T }
+function uniqueBySlug<T extends { slug: string }>(items: T[]) {
+  return Array.from(new Map(items.map((item) => [item.slug, item])).values())
+}
 
 function useCategories() {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: async () => {
-      const { data } = await httpClient.get<ApiResponse<Category[]>>('/categories')
-      return data.data
-    },
+    queryFn: async () =>
+      uniqueBySlug(postSummaries.map((post) => post.category).filter(Boolean) as Category[]),
   })
 }
 
 function useTags() {
   return useQuery({
     queryKey: ['tags'],
-    queryFn: async () => {
-      const { data } = await httpClient.get<ApiResponse<Tag[]>>('/tags')
-      return data.data
-    },
+    queryFn: async () => uniqueBySlug(postSummaries.flatMap((post) => post.tags) as Tag[]),
   })
 }
 

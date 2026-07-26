@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, CloudUpload, FileText, GitBranch, NotebookPen } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/shared/ui/Badge'
 
 const STACK = [
@@ -32,29 +32,6 @@ const STORY = [
   {
     title: 'Current interests',
     body: 'I am studying domain-driven design, Kafka-based recovery patterns, Kubernetes operations, and backend architecture for global commerce.',
-  },
-]
-
-const WRITING_FLOW = [
-  {
-    title: 'Obsidian',
-    description: 'Capture rough thoughts and connect ideas while they are still forming.',
-    icon: NotebookPen,
-  },
-  {
-    title: 'Markdown',
-    description: 'Keep writing portable, plain, and easy to review.',
-    icon: FileText,
-  },
-  {
-    title: 'Git',
-    description: 'Version essays like code, with history and small intentional changes.',
-    icon: GitBranch,
-  },
-  {
-    title: 'Deploy',
-    description: 'Publish finished notes into the blog as part of the same engineering workflow.',
-    icon: CloudUpload,
   },
 ]
 
@@ -95,38 +72,6 @@ export function AboutPage() {
             <p className="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400">{item.body}</p>
           </article>
         ))}
-      </section>
-
-      <section className="space-y-7">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-600 dark:text-accent-300">Writing Workflow</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-normal text-gray-900 dark:text-white">
-            From private notes to published essays.
-          </h2>
-        </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900/70">
-          <div className="grid gap-4 md:grid-cols-4">
-            {WRITING_FLOW.map((step, index) => {
-              const Icon = step.icon
-              return (
-                <div key={step.title} className="relative">
-                  <div className="flex items-center gap-3 md:flex-col md:items-start">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-accent-600 dark:bg-gray-950 dark:text-accent-300">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">{step.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{step.description}</p>
-                    </div>
-                  </div>
-                  {index < WRITING_FLOW.length - 1 && (
-                    <ArrowDown className="mx-4 mt-4 h-4 w-4 text-gray-300 md:absolute md:right-2 md:top-3 md:mx-0 md:mt-0 md:-rotate-90 dark:text-gray-700" />
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
       </section>
 
       <section className="space-y-7">

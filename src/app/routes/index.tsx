@@ -19,7 +19,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <footer className="border-t border-gray-200/80 px-5 py-10 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-500">
-        © {new Date().getFullYear()} Minjee Woo · Think deeply. Engineer broadly.
+        © {new Date().getFullYear()} Minjee Woo · Always curious. Always learning. Always building.
       </footer>
     </div>
   )

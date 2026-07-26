@@ -69,3 +69,25 @@ npm run build
 - Framework: `Vite`
 - Build Command: `npm run build`
 - Output Directory: `dist`
+
+Local production deploy:
+
+```bash
+npm run deploy
+```
+
+## GitHub CI/CD
+
+GitHub Actions deploys automatically through `.github/workflows/vercel.yml`.
+
+- Push to `main`: production deploy
+- Pull request to `main`: preview deploy
+- Manual run: available from the Actions tab
+
+Add these repository secrets in GitHub:
+
+```text
+VERCEL_TOKEN=
+VERCEL_ORG_ID=team_aa7aL3blZEl47YC0nC5SmGiU
+VERCEL_PROJECT_ID=prj_0OEFpZbfJ6ig2NfIZkeFyPMoqC6S
+```
