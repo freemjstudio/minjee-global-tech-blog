@@ -1,5 +1,4 @@
-import { BookOpen, BriefcaseBusiness, Globe2, GraduationCap } from 'lucide-react'
-import { Badge } from '@/shared/ui/Badge'
+import { BookOpen, BriefcaseBusiness, Globe2 } from 'lucide-react'
 
 const CURRENTLY = [
   {
@@ -15,8 +14,6 @@ const CURRENTLY = [
     icon: Globe2,
   },
 ]
-
-const LEARNING = ['Spring', 'Kafka', 'Kubernetes', 'Distributed Systems']
 
 export function NowPage() {
   return (
@@ -47,19 +44,6 @@ export function NowPage() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-7 dark:border-gray-800 dark:bg-gray-900/70">
-        <div className="flex items-center gap-3">
-          <GraduationCap className="h-5 w-5 text-accent-500" />
-          <h2 className="text-xl font-semibold tracking-normal text-gray-900 dark:text-white">Learning</h2>
-        </div>
-        <div className="mt-6 flex flex-wrap gap-2">
-          {LEARNING.map((item) => (
-            <Badge key={item} variant="outline" className="bg-white px-3 py-1.5 dark:bg-gray-900">
-              {item}
-            </Badge>
-          ))}
-        </div>
-      </section>
     </div>
   )
 }
